@@ -1,6 +1,6 @@
 # JsonConfix
 
-**TODO: Add description**
+Load app configuration from a JSON file.
 
 ## Installation
 
@@ -10,9 +10,32 @@ by adding `json_confix` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:json_confix, "~> 0.1.0"}
+    {:json_confix, "~> 0.1.1"}
   ]
 end
+```
+
+## Usage
+
+Add this to your configuration:
+
+```elixir
+config :json_confix,
+  file_path: "/path/to/my/secrets.json"  # Defaults to /tmp/json_confix.json
+```
+
+The JSON file must follow the following format:
+
+```json
+{
+  ...
+  "data": {
+    "MY_SECRET": "***************",
+    ...
+    "ANOTHER_SECRET": "**************"
+  },
+  ...
+}
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
