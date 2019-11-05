@@ -2,6 +2,7 @@
 
 JsonConfix provides a [Distillery](https://github.com/bitwalker/distillery) release config provider that replaces config tuples (e.g {:json, value}) with values read from a JSON file.
 
+Most of the code has been taken from [ConfigTuples](https://github.com/rockneurotiko/config_tuples)
 
 ## Installation
 
