@@ -130,12 +130,20 @@ defmodule JsonConfix.Provider do
     with file_path <- Application.get_env(:json_confix, :file_path, "/tmp/json_confix.json"),
          {:ok, file} <- File.read(file_path),
          {:ok, json} <- Jason.decode(file),
-         {:ok, data} <- Map.fetch(json, "data"),
+         data <- fetch_data(json),
          {:ok, value} <- Map.fetch(data, env) do
       {:ok, cast(value, type)}
     else
       _ -> {:error, {:required, env}}
     end
+  end
+
+  defp fetch_data(json) do
+    keys = Application.get_env(:json_confix, :json_keys, [])
+
+    Enum.reduce(keys, json, fn key, data ->
+      Map.fetch!(data, key)
+    end)
   end
 
   defp env_required({:error, _} = error, true) do

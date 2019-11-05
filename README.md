@@ -17,25 +17,33 @@ end
 
 ## Usage
 
-Add this to your configuration:
+If your JSON file with the configuration is like this
+
+```json
+// /path/to/my/secrets.json
+
+{
+  "noise": {
+    ...
+  },
+  "secrets": {
+    "data": {
+      "MY_SECRET": "***************",
+      "ANOTHER_SECRET": "**************"
+    }
+  },
+  "more_noise": {
+    ...
+  }
+}
+```
+
+Your configuration should look like:
 
 ```elixir
 config :json_confix,
-  file_path: "/path/to/my/secrets.json"  # Defaults to /tmp/json_confix.json
-```
-
-The JSON file must follow the following format:
-
-```json
-{
-  ...
-  "data": {
-    "MY_SECRET": "***************",
-    ...
-    "ANOTHER_SECRET": "**************"
-  },
-  ...
-}
+  file_path: "/path/to/my/secrets.json"  # Defaults to /tmp/json_confix.json,
+  json_keys: ["secrets", "data"]
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
