@@ -1,6 +1,7 @@
 # JsonConfix
 
-Load app configuration from a JSON file.
+JsonConfix provides a [Distillery](https://github.com/bitwalker/distillery) release config provider that replaces config tuples (e.g {:json, value}) with values read from a JSON file.
+
 
 ## Installation
 

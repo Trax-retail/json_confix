@@ -12,25 +12,33 @@ defmodule JsonConfix.Provider do
       ]
     end
 
-  Add this to your app config.exs file:
+  If your JSON file with the configuration is like this
+
+  ```
+  // /path/to/my/secrets.json
+
+  {
+    "noise": {
+      ...
+    },
+    "secrets": {
+      "data": {
+        "MY_SECRET": "***************",
+        "ANOTHER_SECRET": "**************"
+      }
+    },
+    "more_noise": {
+      ...
+    }
+  }
+  ```
+
+  Your configuration should look like:
 
   ```
   config :json_confix,
-    file_path: "/path/to/my/secrets.json"  # Defaults to /tmp/json_confix.json
-  ```
-
-  The JSON file must follow the following format:
-
-  ```
-  {
-    ...
-    "data": {
-      "MY_SECRET": "***************",
-      ...
-      "ANOTHER_SECRET": "**************"
-    },
-    ...
-  }
+    file_path: "/path/to/my/secrets.json"  # Defaults to /tmp/json_confix.json,
+    json_keys: ["secrets", "data"]
   ```
 
   This will result in `JsonConfix.Provider` being invoked during boot, at which point it
