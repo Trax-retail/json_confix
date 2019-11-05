@@ -4,7 +4,7 @@ defmodule JsonConfix.MixProject do
   def project do
     [
       app: :json_confix,
-      version: "0.1.1",
+      version: "0.2.0",
       elixir: "~> 1.6",
       start_permanent: Enum.member?([:prod, :int], Mix.env()),
       deps: deps()

@@ -10,7 +10,7 @@ by adding `json_confix` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:json_confix, "~> 0.1.1"}
+    {:json_confix, "~> 0.2.0"}
   ]
 end
 ```
@@ -19,7 +19,7 @@ end
 
 If your JSON file with the configuration is like this
 
-```json
+```
 // /path/to/my/secrets.json
 
 {
