@@ -240,9 +240,13 @@ defmodule JsonConfix.ProviderTest do
   end
 
   defp assert_config(config, app \\ @app) do
-    config = config
+    config =
+      config
       |> Keyword.to_list()
-      |> Keyword.merge([file_path: Application.get_env(:json_confix, :file_path), json_keys: Application.get_env(:json_confix, :json_keys)])
+      |> Keyword.merge(
+        file_path: Application.get_env(:json_confix, :file_path),
+        json_keys: Application.get_env(:json_confix, :json_keys)
+      )
       |> Enum.sort()
 
     saved_config =

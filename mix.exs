@@ -14,11 +14,9 @@ defmodule JsonConfix.MixProject do
       description: description(),
       start_permanent: Enum.member?([:prod, :int], Mix.env()),
       docs: docs(),
-
       deps: deps()
     ]
   end
-
 
   defp package do
     [
@@ -27,7 +25,8 @@ defmodule JsonConfix.MixProject do
       links: %{
         "GitHub" => @project_url,
         "ConfigTuples" => "https://github.com/rockneurotiko/config_tuples"
-      }
+      },
+      files: ~w(.formatter.exs mix.exs README.md CHANGELOG.md lib)
     ]
   end
 
