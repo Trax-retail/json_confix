@@ -23,7 +23,7 @@ defmodule JsonConfix.MixProject do
     [
       {:distillery, "~> 2.0", runtime: false},
       {:jason, "~> 1.0"},
-      {:ex_doc, "~> 0.18", only: :dev}
+      {:ex_doc, "~> 0.21", only: :dev}
     ]
   end
 end
