@@ -31,8 +31,10 @@ defmodule JsonConfix.MixProject do
   end
 
   defp description do
-    "JsonConfix is a Elixir config provider for Distillery that replaces config tuples (e.g `{:json, value}`) \
-    to the correspondent value read from a JSON file."
+    """
+    JsonConfix is a Elixir config provider for Distillery that replaces config tuples (e.g `{:json, value}`) \
+    to the correspondent value read from a JSON file.
+    """
   end
 
   def docs do
