@@ -240,7 +240,10 @@ defmodule JsonConfix.ProviderTest do
   end
 
   defp assert_config(config, app \\ @app) do
-    config = config |> Keyword.to_list() |> Enum.sort()
+    config = config
+      |> Keyword.to_list()
+      |> Keyword.merge([file_path: Application.get_env(:json_confix, :file_path), json_keys: Application.get_env(:json_confix, :json_keys)])
+      |> Enum.sort()
 
     saved_config =
       app
@@ -253,9 +256,9 @@ defmodule JsonConfix.ProviderTest do
   end
 
   defp write_config(envs, config, callback, app \\ @app) do
-    data = Jason.encode!(%{data: envs})
+    data = Jason.encode!(%{secrets: %{data: envs}})
 
-    File.write!("/tmp/spine_env.json", data)
+    File.write!("/tmp/my-secrets.json", data)
 
     Enum.each(config, fn {k, v} ->
       Application.put_env(app, k, v)
