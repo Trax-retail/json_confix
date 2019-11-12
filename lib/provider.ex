@@ -65,22 +65,51 @@ defmodule JsonConfix.Provider do
   - `{:json, :literal, {:json, "HOST}}`
   """
 
-  use Distillery.Releases.Config.Provider
+  @distillery_loaded Code.ensure_loaded?(Distillery.Releases.Config.Provider)
 
-  @impl Provider
+
+  if @distillery_loaded do
+    @behaviour Distillery.Releases.Config.Provider
+  else
+    @behaviour Config.Provider
+  end
+
+  @ignore_structs [Regex]
+
   def init(_cfg) do
-    # Build up configuration and persist
-    for {app, _, _} <- Application.loaded_applications() do
-      load_env(app)
+    if use_distillery() do
+      distillery_provider()
     end
   end
 
-  defp load_env(app) do
+  def load(config, _) do
+    elixir_provider(config)
+  end
+
+  defp use_distillery() do
+    @distillery_loaded and Application.get_env(:config_tuples, :distillery, true)
+  end
+
+  defp distillery_provider() do
+    # Build up configuration and persist
+    for {app, _, _} <- Application.loaded_applications() do
+      fix_app_env(app)
+    end
+  end
+
+  defp elixir_provider(config) do
+    new_config = replace(config)
+
+    deep_merge(config, new_config)
+  end
+
+  defp fix_app_env(app) do
     base = Application.get_all_env(app)
 
     new_config = replace(base)
 
-    merged = deep_merge(base, new_config)
+    # We have to wrap with the app name, just in case we use Config.Reader
+    [{_app, merged}] = deep_merge([{app, base}], [{app, new_config}])
 
     persist(app, merged)
   end
@@ -96,6 +125,10 @@ defmodule JsonConfix.Provider do
   def replace({:json, value}), do: replace_value(value, [])
   def replace({:json, value, opts}), do: replace_value(value, opts)
 
+  def replace(from..to) do
+    from..to
+  end
+
   def replace(list) when is_list(list) do
     Enum.map(list, fn
       {key, value} -> {replace(key), replace(value)}
@@ -103,13 +136,17 @@ defmodule JsonConfix.Provider do
     end)
   end
 
+  def replace(%{__struct__: struct} = value) when struct in @ignore_structs, do: value
+
+  def replace(%{__struct__: struct} = value) do
+    values = value |> Map.from_struct() |> replace()
+    struct(struct, values)
+  end
+
   def replace(map) when is_map(map) do
     Map.new(map, fn
-      {key, value} ->
-        {replace(key), replace(value)}
-
-      other ->
-        replace(other)
+      {key, value} -> {replace(key), replace(value)}
+      other -> replace(other)
     end)
   end
 
@@ -117,9 +154,7 @@ defmodule JsonConfix.Provider do
     tuple |> Tuple.to_list() |> Enum.map(&replace/1) |> List.to_tuple()
   end
 
-  def replace(other) do
-    other
-  end
+  def replace(other), do: other
 
   defp replace_value(env, opts) do
     type = Keyword.get(opts, :type, :string)
@@ -177,25 +212,31 @@ defmodule JsonConfix.Provider do
   defp cast("false", :boolean), do: false
   defp cast(_, :boolean), do: false
 
-  defp deep_merge(a, b) when is_list(a) and is_list(b) do
-    if Keyword.keyword?(a) and Keyword.keyword?(b) do
-      Keyword.merge(a, b, &deep_merge/3)
-    else
-      b
+  if Code.ensure_loaded?(Config.Reader) do
+    defp deep_merge(base, extra) do
+      Config.Reader.merge(base, extra)
     end
-  end
-
-  defp deep_merge(_k, a, b) when is_list(a) and is_list(b) do
-    if Keyword.keyword?(a) and Keyword.keyword?(b) do
-      Keyword.merge(a, b, &deep_merge/3)
-    else
-      b
+  else
+    defp deep_merge(a, b) when is_list(a) and is_list(b) do
+      if Keyword.keyword?(a) and Keyword.keyword?(b) do
+        Keyword.merge(a, b, &deep_merge/3)
+      else
+        b
+      end
     end
-  end
 
-  defp deep_merge(_k, a, b) when is_map(a) and is_map(b) do
-    Map.merge(a, b, &deep_merge/3)
-  end
+    defp deep_merge(_k, a, b) when is_list(a) and is_list(b) do
+      if Keyword.keyword?(a) and Keyword.keyword?(b) do
+        Keyword.merge(a, b, &deep_merge/3)
+      else
+        b
+      end
+    end
 
-  defp deep_merge(_k, _a, b), do: b
+    defp deep_merge(_k, a, b) when is_map(a) and is_map(b) do
+      Map.merge(a, b, &deep_merge/3)
+    end
+
+    defp deep_merge(_k, _a, b), do: b
+  end
 end
