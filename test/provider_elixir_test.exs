@@ -1,13 +1,10 @@
-defmodule JsonConfix.ProviderTest do
+defmodule JsonConfix.ProviderElixirTest do
   use ExUnit.Case, async: false
-  doctest JsonConfix.Provider
 
   alias JsonConfix.Provider
 
-  @app :json_confix
-
   setup do
-    Application.delete_env(:json_confix, :distillery)
+    Application.put_env(:config_tuples, :distillery, false)
     :ok
   end
 
@@ -30,9 +27,8 @@ defmodule JsonConfix.ProviderTest do
         some_range: 1..2
       ]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(config)
+      write_config(envs, fn ->
+        assert_config(config, config)
       end)
     end
 
@@ -41,9 +37,8 @@ defmodule JsonConfix.ProviderTest do
       config = [host: {:json, "HOST"}]
       expected_config = [host: "localhost"]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -54,9 +49,8 @@ defmodule JsonConfix.ProviderTest do
       config = [host: {:json, "PORT", type: :integer}]
       expected_config = [host: 8080]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -70,9 +64,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [log_level: :info, adapter: Some.Atom]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -87,9 +80,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [truthy: true, falsey: false, other: false]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -100,9 +92,8 @@ defmodule JsonConfix.ProviderTest do
       config = [host: {:json, "HOST"}]
       expected_config = [host: nil]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -118,9 +109,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [string: "cool value", integer: 80, atom: :info, boolean: false]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -135,9 +125,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [host: {:json, "HOST"}]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -152,9 +141,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [config: %{app: %{"host" => "localhost", "other" => "foo"}, other: "bar"}]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -168,9 +156,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [system: "HOST", list: ["foo", 123, {:json, "HOST"}]]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -184,9 +171,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [system: "HOST", list: ["foo", 123, "localhost"]]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -196,14 +182,16 @@ defmodule JsonConfix.ProviderTest do
       envs = %{}
 
       config = [
-        var: {:json, "PORT", type: :integer, required: true}
+        my_app: [
+          var: {:json, "PORT", type: :integer, required: true}
+        ]
       ]
 
       message = "environment variable 'PORT' required but is not setted"
 
-      write_config(envs, config, fn ->
+      write_config(envs, fn ->
         assert_raise(JsonConfix.Error, message, fn ->
-          Provider.init([])
+          Provider.load(config, :ok)
         end)
       end)
     end
@@ -217,9 +205,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [var: 4321]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -239,9 +226,8 @@ defmodule JsonConfix.ProviderTest do
 
       expected_config = [host: {"localhost", "transformed"}, port: {8080, "transformed"}]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
@@ -260,9 +246,8 @@ defmodule JsonConfix.ProviderTest do
         regex: ~r/.+/
       ]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
 
@@ -277,51 +262,40 @@ defmodule JsonConfix.ProviderTest do
         my_struct: %CustomStruct{domain: "localhost"}
       ]
 
-      write_config(envs, config, fn ->
-        Provider.init([])
-        assert_config(expected_config)
+      write_config(envs, fn ->
+        assert_config(config, expected_config)
       end)
     end
   end
 
-  defp assert_config(config, app \\ @app) do
-    config =
-      config
-      |> Keyword.to_list()
-      |> Keyword.merge(
-        file_path: Application.get_env(:json_confix, :file_path),
-        json_keys: Application.get_env(:json_confix, :json_keys)
-      )
-      |> Enum.sort()
+  defp assert_config(config, expected) do
+    config = [my_app: config]
+    expected = [my_app: expected]
 
-    saved_config =
-      app
-      |> Application.get_all_env()
-      |> Keyword.delete(:included_applications)
-      |> Keyword.to_list()
-      |> Enum.sort()
-
-    assert config == saved_config
+    compare_config(expected, Provider.load(config, :ok))
   end
 
-  defp write_config(envs, config, callback, app \\ @app) do
+  defp compare_config(config, other_config) do
+    config = config |> Keyword.to_list() |> Enum.sort()
+    other_config = other_config |> Keyword.to_list() |> Enum.sort()
+
+    assert config == other_config
+  end
+
+
+  defp write_config(envs, callback) do
     data = Jason.encode!(%{secrets: %{data: envs}})
 
     File.write!("/tmp/my-secrets.json", data)
 
-    Enum.each(config, fn {k, v} ->
-      Application.put_env(app, k, v)
-    end)
-
     try do
       callback.()
     after
-      clean_env(config, app)
+      clean_env()
     end
   end
 
-  defp clean_env(config, app) do
-    Enum.each(config, fn {k, _v} -> Application.delete_env(app, k) end)
+  defp clean_env() do
     File.rm("/tmp/my-secrets.json")
   end
 end
